@@ -1,0 +1,78 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <title>Web app</title>
+</head>
+<body>
+    <% if(user.isAuthenticated){ %>
+        <h1>hello <%= user.name%> </h1>
+    <% } %>
+
+    <ul>
+        <li><a href="/" title="Home">Home</a></li>
+        <% if(user.isAuthenticated){ %>
+            <li><form action="/logout" method="get">
+                    <input type="submit" value="Logout ">
+                </form>
+            </li>
+            <li><a href="/profile" >Profile</a></li>
+        <% }else{ %>
+            <li><a href='/sign-up' title='Sign up'>Sign up</a></li>
+        <% }%>
+
+    </ul>
+    <div id="status" style="text-align: center; font-size: 24px"></div>
+    <div id="map" style="height: 500px"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        const status = document.querySelector('#status');
+        const mapLink = document.querySelector('#map');
+
+        if(!navigator.geolocation) {
+            status.textContent = 'Geolocation is not supported by your browser';
+        } else {
+            status.textContent = 'Locating…';
+            navigator.geolocation.getCurrentPosition(success, error);
+        }
+
+        function success(position) {
+            const latitude  = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            status.textContent = "Your location: Latitude: " + latitude + "°, Longitude: " + longitude + "°"
+
+            const options = {
+              method: 'POST',
+                headers: {
+                  'Content-Type' : 'application/json'
+                },
+                body: JSON.stringify({position : {latitude :latitude,longitude : longitude}})
+            };
+            fetch('/getUserData', options)
+
+            var mymap = L.map('map').setView([latitude, longitude], 13);
+
+            let layer = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            mymap.addLayer(layer);
+
+            var marker = L.marker([latitude, longitude]).addTo(mymap);
+
+            marker.bindPopup("your name");
+
+            marker.on('click', onClick);
+
+        }
+
+        function onClick(e) {
+            var popup = e.target.getPopup();
+            var content = popup.getContent();
+        }
+
+        function error() {
+            status.textContent = 'Unable to retrieve your location';
+        }
+    </script>
+
+</body>
+</html>
