@@ -69,6 +69,7 @@ app.get("/sign-up", (req, res) => {
 });
 
 const port = process.env.PORT || 4010;
+app.set("port", port);
 if(process.env.PORT){
     app.listen(port, () => console.log("Server runing"))
 }else{
