@@ -11,10 +11,10 @@ dotenv.config();
 const config = {
     authRequired: false,
     auth0Logout: true,
-    secret: 'a long, randomly-generated string stored in env',
-    baseURL: 'https://localhost:4010',
-    clientID: 'fjNBnVjerJQ4HfnBx2yIPt6szgD9hUng',
-    issuerBaseURL: 'https://dev-29opocqh.us.auth0.com'
+    secret: process.env.SECRET,
+    baseURL: process.env.APP_URL || process.env.BASEURL,
+    clientID: process.env.CLIENTID,
+    issuerBaseURL: process.env.ISSUER
 };
 
 app.use(express.static('public'));
@@ -34,7 +34,6 @@ app.get('/',  function (req, res) {
     if (req.user.isAuthenticated) {
         req.user.name = req.oidc.user.name;
     }
-    console.log(users)
     res.render('index', {user : req.user, users : users});
 });
 
@@ -43,7 +42,6 @@ app.get('/profile', requiresAuth(), (req, res) => {
 });
 
 app.post('/getUserData', requiresAuth(),(req, res) => {
-    console.log("dodem tu")
     users[counter++] = {
         nickname: req.oidc.user.nickname,
         timestamp: req.oidc.user.update_at,
@@ -70,12 +68,15 @@ app.get("/sign-up", (req, res) => {
     });
 });
 
-const hostname = '127.0.0.1';
-const port = 4010;
-https.createServer({
-    key: fs.readFileSync('server.key'),
-    cert: fs.readFileSync('server.cert')
-}, app)
-    .listen(port, function () {
-        console.log(`Server running at https://localhost:${port}/`);
-    });
+const port = process.env.PORT || 4010;
+if(process.env.PORT){
+    app.listen(port, () => console.log("Server runing"))
+}else{
+    https.createServer({
+        key: fs.readFileSync('server.key'),
+        cert: fs.readFileSync('server.cert')
+    }, app)
+        .listen(port, function () {
+            console.log(`Server running at https://localhost:${port}/`);
+        });
+}
