@@ -5,8 +5,7 @@ const app = express();
 var bodyParser = require('body-parser');
 
 const { auth, requiresAuth } = require('express-openid-connect');
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv').config();
 
 const config = {
     authRequired: false,
